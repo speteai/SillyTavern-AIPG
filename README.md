@@ -7,12 +7,13 @@ API. You pay per use from a prepaid balance or a daily free allowance.
 
 - **Chat needs no extension.** SillyTavern's own *Custom (OpenAI-compatible)* source works with the grid. The
   [setup guide](#chat-setup-guide) below lists the settings that matter.
-- **Images need this extension.** SillyTavern's image generation extension has no source that can be pointed at
-  the grid, so this extension adds one: a slash command, a wand-menu entry and an optional tool for the chat model.
+- **Images and video need this extension.** SillyTavern's image generation extension has no source that can be
+  pointed at the grid, so this extension adds one: slash commands, wand-menu entries and optional tools for the
+  chat model. Video clips are short (2 to 10 seconds), have sound, and can start from a picture in the chat.
 
-Tested with SillyTavern 1.19.0 (release branch) against the live grid on 2026-11-13.
+Tested with SillyTavern 1.19.0 (release branch) against the live grid: images on 2026-11-13, video on 2026-11-19.
 
-## Image extension
+## Image and video extension
 
 ### Install
 
@@ -22,9 +23,9 @@ In SillyTavern open **Extensions → Install extension** and enter
 https://github.com/speteai/SillyTavern-AIPG
 ```
 
-Then open **Extensions → AI Power Grid images**, paste an API key from the
+Then open **Extensions → AI Power Grid images and video**, paste an API key from the
 [AIPG Console](https://console.aipowergrid.io/?callbackUrl=%2Fdashboard%2Fapi-key) (it starts with `grid_`) and
-pick a model. The list shows the image models that are online, with their list price.
+pick a model. The lists show the image and video models that are online, with their list price.
 
 ### Use
 
@@ -42,20 +43,48 @@ Sizes: 1024x1024, 1344x768, 768x1344, 1216x832, 832x1216.
 
 **Check credit** shows what the account can spend, including today's free allowance.
 
+### Video
+
+| Way | How |
+| --- | --- |
+| Slash command | `/aipg-video a paper boat drifts along a rain gutter, soft patter of rain` |
+| With options | `/aipg-video seconds=5 size=544x960 a candle flame flickers, quiet crackle` |
+| From a picture | `/aipg-video image=last the camera slowly pushes in, wind in the trees` starts from the newest picture in the chat. `image=` also takes the path of a picture inside SillyTavern, for example the path `/aipg` returned. |
+| Wand menu | **AI Power Grid video**, then type the description |
+| By the chat model | Switch on *Let the chat model generate clips by itself*. The model then gets a tool `aipg_generate_video`. |
+
+Describe what is seen, how it moves and what is heard; the model generates the sound with the picture.
+
+Lengths: 2, 3, 5, 8 or 10 seconds (another number is rounded down to the next of these). Formats: 960x544,
+768x448, 544x960, 704x704. The defaults are set in the extension settings.
+
+The clip is saved as an MP4 in SillyTavern's image folder and added to the chat as a message with a player.
+`/aipg-video` returns the saved path.
+
+A clip is a job on the grid: it cannot be cancelled once started and is billed when it completes. The extension
+therefore notes every started clip in the browser's storage before sending it. If you reload or close the page
+while a clip is being made, it is fetched the next time SillyTavern is open in the same browser and added to the
+chat that is open then.
+
 ### Cost
 
 At the time of the test an image cost between $0.003 (`z-image-turbo`) and $0.01, and took about 10 seconds.
-Models and prices change with the operators who are online.
+Video cost $0.02 per second of clip (`LTX-2.5 Distilled BF16`): a 2-second clip was billed $0.04 and took about
+22 seconds. Before sending, the extension reads the list price and sets it as the most the clip may cost; if the
+model has no published price, nothing is sent. Models and prices change with the operators who are online.
 
 ### Good to know
 
 - The API key is stored in SillyTavern's settings in plain text, like other extension settings. Anyone who can
   read your SillyTavern data folder can read it.
-- The extension talks to `api.aipowergrid.io` directly from your browser. It downloads images only from the
-  grid's own storage (`*.aipg.art`, `*.aipowergrid.io`).
-- Your image description is processed in plain text on a computer run by an independent operator. Keep private
-  details out of it.
-- One image at a time. A second request while one is running is refused with a notice.
+- The extension talks to `api.aipowergrid.io` directly from your browser. It downloads images and clips only
+  from the grid's own storage (`*.aipg.art`, `*.aipowergrid.io`).
+- Your description, and a start picture if you use one, are processed in plain text on a computer run by an
+  independent operator. Keep private details out of them.
+- One image and one clip at a time. A second request while one is running is refused with a notice.
+- The start picture of a clip must be a picture inside your SillyTavern, at most 12 MB. Web links are refused.
+- Not tested for video: the wand-menu entry and the tool for the chat model in a real conversation, clips
+  longer than 2 seconds through this extension, SillyTavern versions other than 1.19.0, phones.
 - If the selected model has gone offline, the list marks it and the request fails with the grid's message.
 
 ## Chat setup guide

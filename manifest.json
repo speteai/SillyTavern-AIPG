@@ -1,11 +1,11 @@
 {
-    "display_name": "AI Power Grid images",
+    "display_name": "AI Power Grid images and video",
     "loading_order": 100,
     "requires": [],
     "optional": [],
     "js": "index.js",
     "author": "speteai",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "homePage": "https://github.com/speteai/SillyTavern-AIPG",
     "auto_update": true
 }
